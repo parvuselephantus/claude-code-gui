@@ -36,13 +36,17 @@ elif [ -f "../mvnw" ]; then
     chmod +x ../mvnw 2>/dev/null || true
 elif [ -d "/usr/local/maven" ]; then
     MAVEN_CMD="/usr/local/maven/bin/mvn"
-elif [ -d "$HOME/apache-maven" ] && [ -f "$HOME/apache-maven/bin/mvn" ]; then
-    MAVEN_CMD="$HOME/apache-maven/bin/mvn"
-elif [ -d "$HOME/.m2/wrapper" ]; then
-    # Check for Maven Wrapper in ~/.m2
-    WRAPPER_MAVEN=$(find "$HOME/.m2/wrapper" -name "mvn" -type f 2>/dev/null | head -n 1)
-    if [ -n "$WRAPPER_MAVEN" ]; then
-        MAVEN_CMD="$WRAPPER_MAVEN"
+else
+    # Search for apache-maven-* directories in home directory
+    MAVEN_DIR=$(find "$HOME" -maxdepth 1 -type d -name "apache-maven-*" 2>/dev/null | head -n 1)
+    if [ -n "$MAVEN_DIR" ] && [ -f "$MAVEN_DIR/bin/mvn" ]; then
+        MAVEN_CMD="$MAVEN_DIR/bin/mvn"
+    elif [ -d "$HOME/.m2/wrapper" ]; then
+        # Check for Maven Wrapper in ~/.m2
+        WRAPPER_MAVEN=$(find "$HOME/.m2/wrapper" -name "mvn" -type f 2>/dev/null | head -n 1)
+        if [ -n "$WRAPPER_MAVEN" ]; then
+            MAVEN_CMD="$WRAPPER_MAVEN"
+        fi
     fi
 fi
 
