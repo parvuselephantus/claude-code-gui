@@ -23,6 +23,7 @@ public class GuiConfiguration {
     private String frontendHost = "localhost";
     private String projectRoot = ".";
     private boolean autoOpenBrowser = true;
+    private String domainName = "localhost";
 
     @PostConstruct
     public void loadConfiguration() {
@@ -65,6 +66,10 @@ public class GuiConfiguration {
 
                 if (root.has("autoOpenBrowser")) {
                     autoOpenBrowser = root.get("autoOpenBrowser").asBoolean();
+                }
+
+                if (root.has("domainName")) {
+                    domainName = root.get("domainName").asText();
                 }
 
                 log.info("Loaded configuration from: {}", configFile.getAbsolutePath());
@@ -110,5 +115,13 @@ public class GuiConfiguration {
 
     public String getFrontendUrl() {
         return String.format("http://%s:%d", frontendHost, frontendPort);
+    }
+
+    public String getDomainName() {
+        return domainName;
+    }
+
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
 }

@@ -78,9 +78,57 @@ Edit `claude-gui.config.json`:
     "host": "localhost"
   },
   "projectRoot": ".",
-  "autoOpenBrowser": true
+  "autoOpenBrowser": true,
+  "domainName": "localhost"
 }
 ```
+
+**Configuration Options:**
+- `backend.port` - Backend server port (default: 8080)
+- `backend.host` - Backend hostname (default: localhost)
+- `frontend.port` - Frontend dev server port (default: 4200)
+- `frontend.host` - Frontend hostname (default: localhost)
+- `projectRoot` - Root directory for project files (default: ".")
+- `autoOpenBrowser` - Automatically open browser on startup (default: true)
+- `domainName` - Domain name for the application (default: "localhost")
+
+### Custom Domain Configuration
+
+To use a custom domain name (e.g., for local network access):
+
+1. **Update `claude-gui.config.json`:**
+   ```json
+   {
+     "backend": {
+       "port": 8080,
+       "host": "myapp"
+     },
+     "frontend": {
+       "port": 4200,
+       "host": "myapp"
+     },
+     "domainName": "myapp"
+   }
+   ```
+
+2. **Add domain to hosts file:**
+   - **Linux/Mac:** Add `127.0.0.1 myapp` to `/etc/hosts`
+   - **Windows:** Add `127.0.0.1 myapp` to `C:\Windows\System32\drivers\etc\hosts`
+   - For network access, use your computer's IP instead of `127.0.0.1`
+
+3. **Update Angular configuration:**
+   - Edit `frontend/angular.json`
+   - Add your domain to the `allowedHosts` array under `serve` → `options`:
+     ```json
+     "serve": {
+       "builder": "@angular/build:dev-server",
+       "options": {
+         "allowedHosts": ["localhost", "myapp"]
+       }
+     }
+     ```
+
+4. **Restart both services**
 
 ### Local Environment (Optional)
 

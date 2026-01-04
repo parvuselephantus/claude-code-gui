@@ -8,5 +8,6 @@
     "host": "localhost"
   },
   "projectRoot": ".",
-  "autoOpenBrowser": true
+  "autoOpenBrowser": true,
+  "domainName": "localhost"
 }

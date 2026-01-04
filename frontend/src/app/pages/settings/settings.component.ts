@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,6 +10,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSelectModule } from '@angular/material/select';
+import { ConfigService } from '../../services/config.service';
 
 @Component({
   selector: 'app-settings',
@@ -22,7 +25,8 @@ import { MatDividerModule } from '@angular/material/divider';
     MatButtonModule,
     MatSlideToggleModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
+    MatSelectModule
   ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss']
@@ -32,7 +36,11 @@ export class SettingsComponent implements OnInit {
   useMcpMode: boolean = false;
   mcpModeAvailable: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private configService: ConfigService
+  ) {}
 
   ngOnInit(): void {
     // Load settings from localStorage
@@ -41,12 +49,12 @@ export class SettingsComponent implements OnInit {
       this.useMcpMode = savedMode === 'true';
     }
 
-    // Check MCP availability (you could call the backend here)
-    this.mcpModeAvailable = true; // For now, assume available
+    // Check MCP availability
+    this.mcpModeAvailable = true;
   }
 
   saveSettings(): void {
-    // Save to localStorage
+    // Save mode to localStorage
     localStorage.setItem('useMcpMode', this.useMcpMode.toString());
 
     // Navigate back to main page
