@@ -44,3 +44,41 @@
   gap: 12px;
   margin-top: 24px;
 }
+
+.coming-soon {
+  background-color: #f9f9f9;
+  border-left: 4px solid #9c27b0;
+
+  .coming-soon-intro {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .feature-section {
+    margin-bottom: 32px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    h3 {
+      color: #9c27b0;
+      font-size: 18px;
+      font-weight: 500;
+      margin: 0 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+}
