@@ -59,6 +59,8 @@ cd .claude-gui
 
 ## Configuration
 
+### Application Configuration
+
 Copy the template to create your config:
 ```bash
 cp claude-gui-template.config.json claude-gui.config.json
@@ -78,6 +80,25 @@ Edit `claude-gui.config.json`:
   "projectRoot": ".",
   "autoOpenBrowser": true
 }
+```
+
+### Local Environment (Optional)
+
+If Maven, Java, or Node.js are not in your PATH, create a local environment file:
+
+```bash
+cp claude-gui-local.template.sh claude-gui.local.sh
+```
+
+Edit `claude-gui.local.sh` to set your paths:
+```bash
+# Maven path
+export MAVEN_HOME="$HOME/apache-maven-3.9.6"
+export PATH="$MAVEN_HOME/bin:$PATH"
+
+# Java path (if needed)
+export JAVA_HOME="$HOME/jdk-17.0.2"
+export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
 ---

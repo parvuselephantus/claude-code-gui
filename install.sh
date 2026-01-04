@@ -2,6 +2,11 @@
 
 set -e
 
+# Source local environment configuration if it exists
+if [ -f "claude-gui.local.sh" ]; then
+    source claude-gui.local.sh
+fi
+
 echo "════════════════════════════════════════════════════════"
 echo "  Claude Code GUI - Installation"
 echo "════════════════════════════════════════════════════════"
