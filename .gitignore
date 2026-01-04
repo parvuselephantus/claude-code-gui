@@ -1,6 +1,7 @@
 # User configuration
 claude-gui.config.json
 claude-gui.local.sh
+frontend/public/config.json
 
 # Logs
 *.log
