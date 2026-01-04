@@ -86,6 +86,8 @@ Edit `claude-gui.config.json`:
 
 - **Java 17+** - [Download](https://adoptium.net/)
 - **Maven 3.6+** - [Download](https://maven.apache.org/download.cgi)
+  - Optional if backend jar is pre-built (e.g., from git clone with included jar)
+  - Install script checks for Maven in PATH, Maven Wrapper (mvnw), and common locations
 - **Node.js 18+** - [Download](https://nodejs.org/)
 - **npm** - Comes with Node.js
 

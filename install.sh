@@ -25,12 +25,47 @@ fi
 echo "✓ Java $JAVA_VERSION detected"
 
 # Check Maven
-if ! command -v mvn &> /dev/null; then
-    echo "❌ Maven not found. Please install Maven 3.6 or higher."
-    echo "   Download from: https://maven.apache.org/download.cgi"
-    exit 1
+MAVEN_CMD=""
+if command -v mvn &> /dev/null; then
+    MAVEN_CMD="mvn"
+elif [ -f "backend/mvnw" ]; then
+    MAVEN_CMD="./backend/mvnw"
+    chmod +x backend/mvnw 2>/dev/null || true
+elif [ -f "../mvnw" ]; then
+    MAVEN_CMD="../mvnw"
+    chmod +x ../mvnw 2>/dev/null || true
+elif [ -d "/usr/local/maven" ]; then
+    MAVEN_CMD="/usr/local/maven/bin/mvn"
+elif [ -d "$HOME/apache-maven" ] && [ -f "$HOME/apache-maven/bin/mvn" ]; then
+    MAVEN_CMD="$HOME/apache-maven/bin/mvn"
+elif [ -d "$HOME/.m2/wrapper" ]; then
+    # Check for Maven Wrapper in ~/.m2
+    WRAPPER_MAVEN=$(find "$HOME/.m2/wrapper" -name "mvn" -type f 2>/dev/null | head -n 1)
+    if [ -n "$WRAPPER_MAVEN" ]; then
+        MAVEN_CMD="$WRAPPER_MAVEN"
+    fi
 fi
-echo "✓ Maven detected"
+
+if [ -z "$MAVEN_CMD" ]; then
+    # Check if backend jar already exists
+    if [ -f "backend/target/claude-code-gui-backend-1.0.0.jar" ]; then
+        echo "⚠ Maven not found, but backend jar already exists - will skip rebuild"
+    else
+        echo "❌ Maven not found in PATH or common locations."
+        echo "   Searched for:"
+        echo "   - mvn command in PATH"
+        echo "   - Maven Wrapper (mvnw) in backend/ or parent directory"
+        echo "   - /usr/local/maven"
+        echo "   - ~/apache-maven"
+        echo "   - ~/.m2/wrapper"
+        echo ""
+        echo "   Please install Maven 3.6+ or use Maven Wrapper."
+        echo "   Download from: https://maven.apache.org/download.cgi"
+        exit 1
+    fi
+else
+    echo "✓ Maven detected: $MAVEN_CMD"
+fi
 
 # Check Node.js
 if ! command -v node &> /dev/null; then
@@ -56,8 +91,18 @@ echo "✓ npm detected"
 echo ""
 echo "Installing backend dependencies..."
 cd backend
-mvn clean install -DskipTests
-echo "✓ Backend dependencies installed"
+
+# Check if we can build or use existing jar
+if [ -n "$MAVEN_CMD" ]; then
+    $MAVEN_CMD clean install -DskipTests
+    echo "✓ Backend dependencies installed"
+elif [ -f "target/claude-code-gui-backend-1.0.0.jar" ]; then
+    echo "⚠ Maven not available but backend jar already exists."
+    echo "✓ Skipping backend build - using existing jar"
+else
+    echo "❌ Cannot build backend - Maven not found and no existing jar"
+    exit 1
+fi
 
 echo ""
 echo "Installing frontend dependencies..."
