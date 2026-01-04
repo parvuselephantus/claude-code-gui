@@ -10,6 +10,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Subscription } from 'rxjs';
 
 import { ClaudeService, ClaudeAnalysisRequest, ClaudeProgress } from '../../services/claude.service';
 import { WebsocketService } from '../../services/websocket.service';
@@ -49,7 +50,7 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
 
   prompt: string = '';
   isAnalyzing: boolean = false;
-  analysisId: string | null = null;
+  currentAnalysisId: string | null = null;
   conversationId: string | null = null;
   progressMessages: string[] = [];
   result: string = '';
@@ -62,6 +63,11 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
   claudeAvailable: boolean = false;
   statusChecked: boolean = false;
 
+  // Subscription management
+  private progressSubscription: Subscription | null = null;
+  private completionSubscription: Subscription | null = null;
+  private errorSubscription: Subscription | null = null;
+
   constructor(
     private claudeService: ClaudeService,
     private websocket: WebsocketService
@@ -73,9 +79,7 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.analysisId) {
-      this.claudeService.unsubscribe(this.analysisId);
-    }
+    this.unsubscribeFromTopics();
     this.websocket.releaseConnection();
   }
 
@@ -143,41 +147,11 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
   private analyzeSimpleMode(request: ClaudeAnalysisRequest, startTime: number): void {
     this.claudeService.analyzeSimple(request).subscribe({
       next: (response) => {
-        this.analysisId = response.analysisId;
+        this.currentAnalysisId = response.analysisId;
         this.addKeyProgress('Analysis started');
 
-        this.claudeService.getProgressUpdates(this.analysisId).subscribe({
-          next: (progress: ClaudeProgress) => {
-            if (this.isKeyProgressMessage(progress.message)) {
-              this.addKeyProgress(progress.message);
-            }
-          }
-        });
-
-        this.claudeService.getCompletion(this.analysisId).subscribe({
-          next: (completion) => {
-            this.result = completion.result || '';
-            this.durationMs = completion.durationMs || (Date.now() - startTime);
-            this.isAnalyzing = false;
-            this.addKeyProgress('Analysis completed');
-
-            if (this.result) {
-              this.conversationHistory.push({
-                role: 'assistant',
-                content: this.result,
-                timestamp: new Date()
-              });
-            }
-          }
-        });
-
-        this.claudeService.getError(this.analysisId).subscribe({
-          next: (errorData) => {
-            this.error = errorData.error;
-            this.isAnalyzing = false;
-            this.addKeyProgress('Analysis failed');
-          }
-        });
+        // Subscribe to topics for this analysis
+        this.subscribeToTopics(this.currentAnalysisId, startTime);
       },
       error: (err) => {
         console.error('Error starting analysis:', err);
@@ -190,47 +164,20 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
   private analyzeMcpMode(request: ClaudeAnalysisRequest, startTime: number): void {
     this.claudeService.analyzeMcp(request).subscribe({
       next: (response) => {
-        this.analysisId = response.analysisId;
+        const isNewConversation = !this.conversationId;
+        this.currentAnalysisId = response.analysisId;
 
-        if (!this.conversationId) {
+        if (isNewConversation) {
+          // First message in conversation - set up subscriptions
           this.conversationId = response.analysisId;
           this.addKeyProgress('Started new conversation');
+          this.subscribeToTopics(this.conversationId, startTime);
+        } else {
+          // Subsequent message - subscriptions already exist, just update state
+          this.addKeyProgress('MCP analysis started');
+          // Store start time for this specific analysis
+          (this as any)._currentStartTime = startTime;
         }
-
-        this.addKeyProgress('MCP analysis started');
-
-        this.claudeService.getProgressUpdates(this.analysisId).subscribe({
-          next: (progress: ClaudeProgress) => {
-            if (this.isKeyProgressMessage(progress.message)) {
-              this.addKeyProgress(progress.message);
-            }
-          }
-        });
-
-        this.claudeService.getCompletion(this.analysisId).subscribe({
-          next: (completion) => {
-            this.result = completion.result || '';
-            this.durationMs = completion.durationMs || (Date.now() - startTime);
-            this.isAnalyzing = false;
-            this.addKeyProgress('MCP analysis completed');
-
-            if (this.result) {
-              this.conversationHistory.push({
-                role: 'assistant',
-                content: this.result,
-                timestamp: new Date()
-              });
-            }
-          }
-        });
-
-        this.claudeService.getError(this.analysisId).subscribe({
-          next: (errorData) => {
-            this.error = errorData.error;
-            this.isAnalyzing = false;
-            this.addKeyProgress('MCP analysis failed');
-          }
-        });
       },
       error: (err) => {
         console.error('Error starting MCP analysis:', err);
@@ -238,6 +185,84 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
         this.isAnalyzing = false;
       }
     });
+  }
+
+  private subscribeToTopics(analysisId: string, startTime: number): void {
+    // Store start time for completion handler
+    (this as any)._currentStartTime = startTime;
+
+    // Unsubscribe from previous topics if any
+    this.unsubscribeFromTopics();
+
+    // Subscribe to progress updates
+    this.progressSubscription = this.claudeService.getProgressUpdates(analysisId).subscribe({
+      next: (progress: ClaudeProgress) => {
+        if (this.isKeyProgressMessage(progress.message)) {
+          this.addKeyProgress(progress.message);
+        }
+      }
+    });
+
+    // Subscribe to completion
+    this.completionSubscription = this.claudeService.getCompletion(analysisId).subscribe({
+      next: (completion) => {
+        this.result = completion.result || '';
+        this.durationMs = completion.durationMs || (Date.now() - (this as any)._currentStartTime);
+        this.isAnalyzing = false;
+        this.addKeyProgress('Analysis completed');
+
+        if (this.result) {
+          this.conversationHistory.push({
+            role: 'assistant',
+            content: this.result,
+            timestamp: new Date()
+          });
+        }
+
+        // In simple mode, unsubscribe after completion
+        if (this.mode === 'simple') {
+          this.unsubscribeFromTopics();
+        }
+      }
+    });
+
+    // Subscribe to errors
+    this.errorSubscription = this.claudeService.getError(analysisId).subscribe({
+      next: (errorData) => {
+        this.error = errorData.error;
+        this.isAnalyzing = false;
+        this.addKeyProgress('Analysis failed');
+
+        // In simple mode, unsubscribe after error
+        if (this.mode === 'simple') {
+          this.unsubscribeFromTopics();
+        }
+      }
+    });
+  }
+
+  private unsubscribeFromTopics(): void {
+    if (this.progressSubscription) {
+      this.progressSubscription.unsubscribe();
+      this.progressSubscription = null;
+    }
+
+    if (this.completionSubscription) {
+      this.completionSubscription.unsubscribe();
+      this.completionSubscription = null;
+    }
+
+    if (this.errorSubscription) {
+      this.errorSubscription.unsubscribe();
+      this.errorSubscription = null;
+    }
+
+    // Clean up WebSocket subscriptions
+    if (this.conversationId && this.mode === 'mcp') {
+      this.claudeService.unsubscribe(this.conversationId);
+    } else if (this.currentAnalysisId && this.mode === 'simple') {
+      this.claudeService.unsubscribe(this.currentAnalysisId);
+    }
   }
 
   private addKeyProgress(message: string): void {
@@ -270,6 +295,8 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
     this.conversationHistory = [];
 
     if (this.mode === 'mcp') {
+      // Unsubscribe from current conversation topics
+      this.unsubscribeFromTopics();
       this.conversationId = null;
       this.addKeyProgress('Conversation cleared');
     }
@@ -281,6 +308,8 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
 
   onModeChange(): void {
     this.error = '';
+    // Unsubscribe from previous mode's topics
+    this.unsubscribeFromTopics();
     this.conversationId = null;
   }
 }
