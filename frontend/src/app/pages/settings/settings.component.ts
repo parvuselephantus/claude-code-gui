@@ -43,21 +43,18 @@ export class SettingsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Load settings from localStorage
     const savedMode = localStorage.getItem('useMcpMode');
     if (savedMode !== null) {
       this.useMcpMode = savedMode === 'true';
+    } else {
+      this.useMcpMode = true;
     }
 
-    // Check MCP availability
     this.mcpModeAvailable = true;
   }
 
   saveSettings(): void {
-    // Save mode to localStorage
     localStorage.setItem('useMcpMode', this.useMcpMode.toString());
-
-    // Navigate back to main page
     this.router.navigate(['/']);
   }
 

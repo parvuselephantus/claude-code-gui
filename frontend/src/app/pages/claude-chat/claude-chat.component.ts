@@ -84,10 +84,11 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
   }
 
   loadSettings(): void {
-    // Load mode from localStorage
     const savedMode = localStorage.getItem('useMcpMode');
     if (savedMode !== null) {
       this.useMcpMode = savedMode === 'true';
+    } else {
+      this.useMcpMode = true;
     }
   }
 
@@ -281,7 +282,7 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
 
   onModeChange(): void {
     this.error = '';
-    // Unsubscribe from previous mode's topics
+    localStorage.setItem('useMcpMode', this.useMcpMode.toString());
     this.unsubscribeFromTopics();
     this.conversationId = null;
   }
