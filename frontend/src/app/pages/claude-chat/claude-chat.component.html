@@ -1,51 +1,26 @@
 <div class="claude-chat-container">
-  <h1>Claude Code GUI</h1>
-
-  <!-- Status Card -->
-  <mat-card class="status-card" *ngIf="statusChecked">
-    <mat-card-content>
-      <div class="status-line">
-        <span class="status-label">Claude Code Status:</span>
-        <mat-chip [color]="claudeAvailable ? 'primary' : 'warn'">
-          {{ claudeAvailable ? 'Available' : 'Not Available' }}
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-left">
+      <h1>Claude Code GUI</h1>
+      <div class="status-info" *ngIf="statusChecked">
+        <mat-chip [color]="claudeAvailable ? 'primary' : 'warn'" class="status-chip">
+          {{ claudeAvailable ? '● Available' : '● Not Available' }}
+        </mat-chip>
+        <mat-chip class="mode-chip">
+          {{ useMcpMode ? '💬 MCP Mode' : '📄 Simple Mode' }}
         </mat-chip>
       </div>
-      <div class="status-line" *ngIf="!claudeAvailable">
-        <span class="warning-text">⚠️ Claude Code CLI is not installed or not in PATH</span>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+    <button mat-icon-button (click)="goToSettings()" class="settings-button" matTooltip="Settings">
+      <mat-icon>settings</mat-icon>
+    </button>
+  </div>
 
-  <!-- Mode Selection -->
-  <mat-card class="mode-card">
-    <mat-card-header>
-      <mat-card-title>Analysis Mode</mat-card-title>
-    </mat-card-header>
+  <!-- Warning if Claude not available -->
+  <mat-card class="warning-card" *ngIf="statusChecked && !claudeAvailable">
     <mat-card-content>
-      <mat-slide-toggle
-        [(ngModel)]="useMcpMode"
-        (ngModelChange)="onModeChange()"
-        [disabled]="isAnalyzing || !mcpModeAvailable"
-        color="primary"
-        [matTooltip]="mcpModeAvailable ? 'Switch between simple and conversation modes' : 'MCP mode requires Claude Code CLI'"
-      >
-        <span *ngIf="!useMcpMode" class="mode-label">
-          📄 Simple Mode (One-shot)
-        </span>
-        <span *ngIf="useMcpMode" class="mode-label">
-          💬 MCP Mode (Conversation)
-        </span>
-      </mat-slide-toggle>
-
-      <div class="mode-description">
-        <p *ngIf="!useMcpMode">
-          <strong>Simple Mode:</strong> Claude provides a single analysis response. Best for quick questions.
-        </p>
-        <p *ngIf="useMcpMode">
-          <strong>MCP Mode:</strong> Claude maintains conversation history for multi-turn discussions.
-          Best for complex exploratory questions.
-        </p>
-      </div>
+      ⚠️ Claude Code CLI is not installed or not in PATH
     </mat-card-content>
   </mat-card>
 

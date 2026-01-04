@@ -3,9 +3,56 @@
   margin: 0 auto;
   padding: 20px;
 
-  h1 {
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
-    color: #333;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e0e0e0;
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      h1 {
+        margin: 0;
+        color: #333;
+        font-size: 1.75rem;
+      }
+
+      .status-info {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+
+        .status-chip, .mode-chip {
+          font-size: 13px;
+          height: 28px;
+        }
+      }
+    }
+
+    .settings-button {
+      color: #666;
+
+      &:hover {
+        color: #1976d2;
+        background-color: rgba(25, 118, 210, 0.08);
+      }
+    }
+  }
+
+  .warning-card {
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+    margin-bottom: 20px;
+
+    mat-card-content {
+      color: #e65100;
+      font-weight: 500;
+    }
   }
 
   mat-card {
@@ -17,51 +64,6 @@
       mat-card-title {
         font-size: 18px;
         font-weight: 500;
-      }
-    }
-  }
-
-  .status-card {
-    .status-line {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
-
-      .status-label {
-        font-weight: 500;
-      }
-    }
-
-    .warning-text {
-      color: #f44336;
-      font-size: 14px;
-    }
-  }
-
-  .mode-card {
-    .mode-label {
-      font-size: 16px;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .mode-description {
-      margin-top: 16px;
-      padding: 12px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
-
-      p {
-        margin: 0;
-        font-size: 14px;
-        line-height: 1.5;
-
-        strong {
-          color: #1976d2;
-        }
       }
     }
   }

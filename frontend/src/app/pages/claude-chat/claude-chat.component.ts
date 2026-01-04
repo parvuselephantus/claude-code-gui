@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -72,12 +73,26 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
 
   constructor(
     private claudeService: ClaudeService,
-    private websocket: WebsocketService
+    private websocket: WebsocketService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.websocket.requestConnection();
     this.checkStatus();
+    this.loadSettings();
+  }
+
+  loadSettings(): void {
+    // Load mode from localStorage
+    const savedMode = localStorage.getItem('useMcpMode');
+    if (savedMode !== null) {
+      this.useMcpMode = savedMode === 'true';
+    }
+  }
+
+  goToSettings(): void {
+    this.router.navigate(['/settings']);
   }
 
   ngOnDestroy(): void {
