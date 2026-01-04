@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Client, StompSubscription } from '@stomp/stompjs';
-import { environment } from '../../environments/environment';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import SockJS from 'sockjs-client';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +19,7 @@ export class WebsocketService {
 
   public connectionStatus$ = this.connectionStatus.asObservable();
 
-  constructor() {
+  constructor(private configService: ConfigService) {
     window.addEventListener('focus', () => {
       if (this.connectionCount > 0 && !this.isConnected()) {
         this.connect();
@@ -128,8 +128,9 @@ export class WebsocketService {
 
     console.log('Connecting to WebSocket...');
 
+    const apiUrl = this.configService.getApiUrl();
     this.stompClient = new Client({
-      webSocketFactory: () => new SockJS(`${environment.apiUrl}/ws`),
+      webSocketFactory: () => new SockJS(`${apiUrl}/ws`),
       reconnectDelay: this.getReconnectDelay(),
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
