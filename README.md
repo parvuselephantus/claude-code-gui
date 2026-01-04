@@ -6,7 +6,7 @@ A clean, standalone web GUI for interacting with Claude Code CLI. Simple chat in
 
 ### Linux/Mac
 ```bash
-git clone https://github.com/yourusername/claude-code-gui.git
+git clone https://github.com/parvuselephantus/claude-code-gui.git
 cd claude-code-gui
 ./install.sh
 ./start.sh
@@ -14,7 +14,7 @@ cd claude-code-gui
 
 ### Windows
 ```cmd
-git clone https://github.com/yourusername/claude-code-gui.git
+git clone https://github.com/parvuselephantus/claude-code-gui.git
 cd claude-code-gui
 install.bat
 start.bat
@@ -33,7 +33,7 @@ Open http://localhost:4200 in your browser.
 
 ### Method 1: Standalone Clone
 ```bash
-git clone https://github.com/yourusername/claude-code-gui.git
+git clone https://github.com/parvuselephantus/claude-code-gui.git
 cd claude-code-gui
 ./install.sh    # or install.bat on Windows
 ```
@@ -41,7 +41,7 @@ cd claude-code-gui
 ### Method 2: Git Submodule
 ```bash
 cd your-project
-git submodule add https://github.com/yourusername/claude-code-gui.git .claude-gui
+git submodule add https://github.com/parvuselephantus/claude-code-gui.git .claude-gui
 cd .claude-gui
 ./install.sh
 ```
@@ -49,7 +49,7 @@ cd .claude-gui
 ### Method 3: Clone into Project
 ```bash
 cd your-project
-git clone https://github.com/yourusername/claude-code-gui.git .claude-gui
+git clone https://github.com/parvuselephantus/claude-code-gui.git .claude-gui
 echo ".claude-gui/" >> .gitignore
 cd .claude-gui
 ./install.sh
