@@ -1,0 +1,161 @@
+<div class="claude-chat-container">
+  <h1>Claude Code GUI</h1>
+
+  <!-- Status Card -->
+  <mat-card class="status-card" *ngIf="statusChecked">
+    <mat-card-content>
+      <div class="status-line">
+        <span class="status-label">Claude Code Status:</span>
+        <mat-chip [color]="claudeAvailable ? 'primary' : 'warn'">
+          {{ claudeAvailable ? 'Available' : 'Not Available' }}
+        </mat-chip>
+      </div>
+      <div class="status-line" *ngIf="!claudeAvailable">
+        <span class="warning-text">⚠️ Claude Code CLI is not installed or not in PATH</span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Mode Selection -->
+  <mat-card class="mode-card">
+    <mat-card-header>
+      <mat-card-title>Analysis Mode</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-slide-toggle
+        [(ngModel)]="useMcpMode"
+        (ngModelChange)="onModeChange()"
+        [disabled]="isAnalyzing || !mcpModeAvailable"
+        color="primary"
+        [matTooltip]="mcpModeAvailable ? 'Switch between simple and conversation modes' : 'MCP mode requires Claude Code CLI'"
+      >
+        <span *ngIf="!useMcpMode" class="mode-label">
+          📄 Simple Mode (One-shot)
+        </span>
+        <span *ngIf="useMcpMode" class="mode-label">
+          💬 MCP Mode (Conversation)
+        </span>
+      </mat-slide-toggle>
+
+      <div class="mode-description">
+        <p *ngIf="!useMcpMode">
+          <strong>Simple Mode:</strong> Claude provides a single analysis response. Best for quick questions.
+        </p>
+        <p *ngIf="useMcpMode">
+          <strong>MCP Mode:</strong> Claude maintains conversation history for multi-turn discussions.
+          Best for complex exploratory questions.
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Input Card -->
+  <mat-card class="input-card">
+    <mat-card-header>
+      <mat-card-title>Ask Claude</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Prompt Input -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Prompt</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="prompt"
+          [disabled]="isAnalyzing"
+          rows="6"
+          placeholder="Ask Claude anything..."
+          (keydown.control.enter)="analyze()"
+        ></textarea>
+        <mat-hint>Press Ctrl+Enter to submit</mat-hint>
+      </mat-form-field>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="analyze()"
+          [disabled]="isAnalyzing || !prompt.trim() || !claudeAvailable"
+        >
+          <mat-spinner *ngIf="isAnalyzing" diameter="20"></mat-spinner>
+          <span *ngIf="!isAnalyzing">Send</span>
+          <span *ngIf="isAnalyzing">Analyzing...</span>
+        </button>
+
+        <button
+          mat-stroked-button
+          (click)="clearResults()"
+          [disabled]="isAnalyzing || conversationHistory.length === 0"
+        >
+          New Conversation
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Progress Card -->
+  <mat-card class="progress-card" *ngIf="progressMessages.length > 0">
+    <mat-card-header>
+      <mat-card-title>Progress</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="progress-log">
+        <div *ngFor="let message of progressMessages" class="progress-message">
+          {{ message }}
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Conversation History Card -->
+  <mat-card class="conversation-card" *ngIf="conversationHistory.length > 0">
+    <mat-card-header>
+      <mat-card-title>
+        💬 Conversation
+      </mat-card-title>
+      <div class="conversation-metadata">
+        <mat-chip *ngIf="conversationId" color="primary">ID: {{ conversationId.substring(0, 8) }}</mat-chip>
+        <mat-chip>{{ conversationHistory.length }} messages</mat-chip>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="conversation-history">
+        <div *ngFor="let message of conversationHistory"
+             class="message-block"
+             [class.user-message]="message.role === 'user'"
+             [class.assistant-message]="message.role === 'assistant'">
+
+          <!-- Message Header -->
+          <div class="message-header">
+            <div class="message-role">
+              <strong>{{ message.role === 'user' ? '👤 You' : '🤖 Claude' }}</strong>
+            </div>
+            <span class="message-timestamp">{{ message.timestamp | date:'short' }}</span>
+          </div>
+
+          <!-- Message Content -->
+          <div class="message-content">
+            <pre class="message-text">{{ message.content }}</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Metadata -->
+      <div class="current-analysis-meta" *ngIf="!isAnalyzing && durationMs > 0">
+        <mat-chip>⏱️ {{ durationMs / 1000 | number:'1.1-1' }}s</mat-chip>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Error Card -->
+  <mat-card class="error-card" *ngIf="error">
+    <mat-card-header>
+      <mat-card-title>❌ Error</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="error-display">
+        <p>{{ error }}</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

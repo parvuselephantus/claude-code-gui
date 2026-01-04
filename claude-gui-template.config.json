@@ -1,0 +1,12 @@
+{
+  "backend": {
+    "port": 8080,
+    "host": "localhost"
+  },
+  "frontend": {
+    "port": 4200,
+    "host": "localhost"
+  },
+  "projectRoot": ".",
+  "autoOpenBrowser": true
+}

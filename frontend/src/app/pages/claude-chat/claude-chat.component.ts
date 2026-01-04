@@ -1,0 +1,286 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { ClaudeService, ClaudeAnalysisRequest, ClaudeProgress } from '../../services/claude.service';
+import { WebsocketService } from '../../services/websocket.service';
+
+interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
+@Component({
+  selector: 'app-claude-chat',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatChipsModule,
+    MatSlideToggleModule,
+    MatIconModule,
+    MatTooltipModule
+  ],
+  templateUrl: './claude-chat.component.html',
+  styleUrls: ['./claude-chat.component.scss']
+})
+export class ClaudeChatComponent implements OnInit, OnDestroy {
+  useMcpMode: boolean = false;
+  mcpModeAvailable = false;
+
+  get mode(): 'simple' | 'mcp' {
+    return this.useMcpMode ? 'mcp' : 'simple';
+  }
+
+  prompt: string = '';
+  isAnalyzing: boolean = false;
+  analysisId: string | null = null;
+  conversationId: string | null = null;
+  progressMessages: string[] = [];
+  result: string = '';
+  error: string = '';
+  durationMs: number = 0;
+
+  // Conversation history
+  conversationHistory: ConversationMessage[] = [];
+
+  claudeAvailable: boolean = false;
+  statusChecked: boolean = false;
+
+  constructor(
+    private claudeService: ClaudeService,
+    private websocket: WebsocketService
+  ) {}
+
+  ngOnInit(): void {
+    this.websocket.requestConnection();
+    this.checkStatus();
+  }
+
+  ngOnDestroy(): void {
+    if (this.analysisId) {
+      this.claudeService.unsubscribe(this.analysisId);
+    }
+    this.websocket.releaseConnection();
+  }
+
+  checkStatus(): void {
+    this.claudeService.getStatus().subscribe({
+      next: (status) => {
+        this.claudeAvailable = status.claudeAvailable;
+        this.mcpModeAvailable = status.mcpMode;
+        this.statusChecked = true;
+
+        if (!this.mcpModeAvailable && this.useMcpMode) {
+          this.useMcpMode = false;
+        }
+      },
+      error: (err) => {
+        console.error('Error checking Claude status:', err);
+        this.statusChecked = true;
+        this.claudeAvailable = false;
+      }
+    });
+  }
+
+  analyze(): void {
+    if (!this.prompt.trim()) {
+      this.error = 'Please enter a prompt';
+      return;
+    }
+
+    if (!this.claudeAvailable) {
+      this.error = 'Claude Code is not available';
+      return;
+    }
+
+    // Add user message to conversation history
+    this.conversationHistory.push({
+      role: 'user',
+      content: this.prompt,
+      timestamp: new Date()
+    });
+
+    this.isAnalyzing = true;
+    this.progressMessages = [];
+    this.result = '';
+    this.error = '';
+    this.durationMs = 0;
+
+    const request: ClaudeAnalysisRequest = {
+      prompt: this.prompt,
+      mode: this.mode,
+      conversationId: this.mode === 'mcp' ? (this.conversationId ?? undefined) : undefined
+    };
+
+    const startTime = Date.now();
+
+    if (this.mode === 'simple') {
+      this.analyzeSimpleMode(request, startTime);
+    } else {
+      this.analyzeMcpMode(request, startTime);
+    }
+
+    // Clear prompt after sending
+    this.prompt = '';
+  }
+
+  private analyzeSimpleMode(request: ClaudeAnalysisRequest, startTime: number): void {
+    this.claudeService.analyzeSimple(request).subscribe({
+      next: (response) => {
+        this.analysisId = response.analysisId;
+        this.addKeyProgress('Analysis started');
+
+        this.claudeService.getProgressUpdates(this.analysisId).subscribe({
+          next: (progress: ClaudeProgress) => {
+            if (this.isKeyProgressMessage(progress.message)) {
+              this.addKeyProgress(progress.message);
+            }
+          }
+        });
+
+        this.claudeService.getCompletion(this.analysisId).subscribe({
+          next: (completion) => {
+            this.result = completion.result || '';
+            this.durationMs = completion.durationMs || (Date.now() - startTime);
+            this.isAnalyzing = false;
+            this.addKeyProgress('Analysis completed');
+
+            if (this.result) {
+              this.conversationHistory.push({
+                role: 'assistant',
+                content: this.result,
+                timestamp: new Date()
+              });
+            }
+          }
+        });
+
+        this.claudeService.getError(this.analysisId).subscribe({
+          next: (errorData) => {
+            this.error = errorData.error;
+            this.isAnalyzing = false;
+            this.addKeyProgress('Analysis failed');
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error starting analysis:', err);
+        this.error = 'Failed to start analysis: ' + err.message;
+        this.isAnalyzing = false;
+      }
+    });
+  }
+
+  private analyzeMcpMode(request: ClaudeAnalysisRequest, startTime: number): void {
+    this.claudeService.analyzeMcp(request).subscribe({
+      next: (response) => {
+        this.analysisId = response.analysisId;
+
+        if (!this.conversationId) {
+          this.conversationId = response.analysisId;
+          this.addKeyProgress('Started new conversation');
+        }
+
+        this.addKeyProgress('MCP analysis started');
+
+        this.claudeService.getProgressUpdates(this.analysisId).subscribe({
+          next: (progress: ClaudeProgress) => {
+            if (this.isKeyProgressMessage(progress.message)) {
+              this.addKeyProgress(progress.message);
+            }
+          }
+        });
+
+        this.claudeService.getCompletion(this.analysisId).subscribe({
+          next: (completion) => {
+            this.result = completion.result || '';
+            this.durationMs = completion.durationMs || (Date.now() - startTime);
+            this.isAnalyzing = false;
+            this.addKeyProgress('MCP analysis completed');
+
+            if (this.result) {
+              this.conversationHistory.push({
+                role: 'assistant',
+                content: this.result,
+                timestamp: new Date()
+              });
+            }
+          }
+        });
+
+        this.claudeService.getError(this.analysisId).subscribe({
+          next: (errorData) => {
+            this.error = errorData.error;
+            this.isAnalyzing = false;
+            this.addKeyProgress('MCP analysis failed');
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error starting MCP analysis:', err);
+        this.error = 'Failed to start MCP analysis: ' + err.message;
+        this.isAnalyzing = false;
+      }
+    });
+  }
+
+  private addKeyProgress(message: string): void {
+    const timestamp = new Date().toLocaleTimeString();
+    this.progressMessages.push(`[${timestamp}] ${message}`);
+  }
+
+  private isKeyProgressMessage(message: string): boolean {
+    const keyPhrases = [
+      'started',
+      'completed',
+      'failed',
+      'error',
+      'calling tool',
+      'tool result',
+      'saved',
+      'connecting',
+      'analyzing'
+    ];
+
+    const lowerMessage = message.toLowerCase();
+    return keyPhrases.some(phrase => lowerMessage.includes(phrase));
+  }
+
+  clearResults(): void {
+    this.result = '';
+    this.error = '';
+    this.progressMessages = [];
+    this.durationMs = 0;
+    this.conversationHistory = [];
+
+    if (this.mode === 'mcp') {
+      this.conversationId = null;
+      this.addKeyProgress('Conversation cleared');
+    }
+  }
+
+  clearPrompt(): void {
+    this.prompt = '';
+  }
+
+  onModeChange(): void {
+    this.error = '';
+    this.conversationId = null;
+  }
+}
