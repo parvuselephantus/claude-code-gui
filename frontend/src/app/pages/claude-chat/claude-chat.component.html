@@ -93,20 +93,6 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Progress Card -->
-  <mat-card class="progress-card" *ngIf="progressMessages.length > 0">
-    <mat-card-header>
-      <mat-card-title>Progress</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="progress-log">
-        <div *ngFor="let message of progressMessages" class="progress-message">
-          {{ message }}
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
   <!-- Conversation History Card -->
   <mat-card class="conversation-card" *ngIf="conversationHistory.length > 0">
     <mat-card-header>
@@ -116,11 +102,12 @@
       <div class="conversation-metadata">
         <mat-chip *ngIf="conversationId" color="primary">ID: {{ conversationId.substring(0, 8) }}</mat-chip>
         <mat-chip>{{ conversationHistory.length }} messages</mat-chip>
+        <mat-chip *ngIf="!isAnalyzing && durationMs > 0">⏱️ {{ durationMs / 1000 | number:'1.1-1' }}s</mat-chip>
       </div>
     </mat-card-header>
     <mat-card-content>
       <div class="conversation-history">
-        <div *ngFor="let message of conversationHistory"
+        <div *ngFor="let message of reversedConversationHistory"
              class="message-block"
              [class.user-message]="message.role === 'user'"
              [class.assistant-message]="message.role === 'assistant'">
@@ -138,11 +125,6 @@
             <pre class="message-text">{{ message.content }}</pre>
           </div>
         </div>
-      </div>
-
-      <!-- Analysis Metadata -->
-      <div class="current-analysis-meta" *ngIf="!isAnalyzing && durationMs > 0">
-        <mat-chip>⏱️ {{ durationMs / 1000 | number:'1.1-1' }}s</mat-chip>
       </div>
     </mat-card-content>
   </mat-card>

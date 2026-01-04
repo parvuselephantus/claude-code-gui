@@ -48,11 +48,14 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
     return this.useMcpMode ? 'mcp' : 'simple';
   }
 
+  get reversedConversationHistory(): ConversationMessage[] {
+    return [...this.conversationHistory].reverse();
+  }
+
   prompt: string = '';
   isAnalyzing: boolean = false;
   currentAnalysisId: string | null = null;
   conversationId: string | null = null;
-  progressMessages: string[] = [];
   result: string = '';
   error: string = '';
   durationMs: number = 0;
@@ -64,7 +67,6 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
   statusChecked: boolean = false;
 
   // Subscription management
-  private progressSubscription: Subscription | null = null;
   private completionSubscription: Subscription | null = null;
   private errorSubscription: Subscription | null = null;
 
@@ -121,7 +123,6 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
     });
 
     this.isAnalyzing = true;
-    this.progressMessages = [];
     this.result = '';
     this.error = '';
     this.durationMs = 0;
@@ -148,7 +149,6 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
     this.claudeService.analyzeSimple(request).subscribe({
       next: (response) => {
         this.currentAnalysisId = response.analysisId;
-        this.addKeyProgress('Analysis started');
 
         // Subscribe to topics for this analysis
         this.subscribeToTopics(this.currentAnalysisId, startTime);
@@ -170,11 +170,9 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
         if (isNewConversation) {
           // First message in conversation - set up subscriptions
           this.conversationId = response.analysisId;
-          this.addKeyProgress('Started new conversation');
           this.subscribeToTopics(this.conversationId, startTime);
         } else {
           // Subsequent message - subscriptions already exist, just update state
-          this.addKeyProgress('MCP analysis started');
           // Store start time for this specific analysis
           (this as any)._currentStartTime = startTime;
         }
@@ -194,22 +192,12 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
     // Unsubscribe from previous topics if any
     this.unsubscribeFromTopics();
 
-    // Subscribe to progress updates
-    this.progressSubscription = this.claudeService.getProgressUpdates(analysisId).subscribe({
-      next: (progress: ClaudeProgress) => {
-        if (this.isKeyProgressMessage(progress.message)) {
-          this.addKeyProgress(progress.message);
-        }
-      }
-    });
-
     // Subscribe to completion
     this.completionSubscription = this.claudeService.getCompletion(analysisId).subscribe({
       next: (completion) => {
         this.result = completion.result || '';
         this.durationMs = completion.durationMs || (Date.now() - (this as any)._currentStartTime);
         this.isAnalyzing = false;
-        this.addKeyProgress('Analysis completed');
 
         if (this.result) {
           this.conversationHistory.push({
@@ -231,7 +219,6 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
       next: (errorData) => {
         this.error = errorData.error;
         this.isAnalyzing = false;
-        this.addKeyProgress('Analysis failed');
 
         // In simple mode, unsubscribe after error
         if (this.mode === 'simple') {
@@ -242,11 +229,6 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
   }
 
   private unsubscribeFromTopics(): void {
-    if (this.progressSubscription) {
-      this.progressSubscription.unsubscribe();
-      this.progressSubscription = null;
-    }
-
     if (this.completionSubscription) {
       this.completionSubscription.unsubscribe();
       this.completionSubscription = null;
@@ -265,32 +247,9 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  private addKeyProgress(message: string): void {
-    const timestamp = new Date().toLocaleTimeString();
-    this.progressMessages.push(`[${timestamp}] ${message}`);
-  }
-
-  private isKeyProgressMessage(message: string): boolean {
-    const keyPhrases = [
-      'started',
-      'completed',
-      'failed',
-      'error',
-      'calling tool',
-      'tool result',
-      'saved',
-      'connecting',
-      'analyzing'
-    ];
-
-    const lowerMessage = message.toLowerCase();
-    return keyPhrases.some(phrase => lowerMessage.includes(phrase));
-  }
-
   clearResults(): void {
     this.result = '';
     this.error = '';
-    this.progressMessages = [];
     this.durationMs = 0;
     this.conversationHistory = [];
 
@@ -298,7 +257,6 @@ export class ClaudeChatComponent implements OnInit, OnDestroy {
       // Unsubscribe from current conversation topics
       this.unsubscribeFromTopics();
       this.conversationId = null;
-      this.addKeyProgress('Conversation cleared');
     }
   }
 
