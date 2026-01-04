@@ -17,7 +17,17 @@ $claude-theme: mat.m2-define-light-theme((
   density: 0,
 ));
 
-@include mat.all-component-themes($claude-theme);
+// Include only the components we actually use (much smaller bundle!)
+@include mat.button-theme($claude-theme);
+@include mat.card-theme($claude-theme);
+@include mat.chips-theme($claude-theme);
+@include mat.form-field-theme($claude-theme);
+@include mat.input-theme($claude-theme);
+@include mat.progress-spinner-theme($claude-theme);
+@include mat.slide-toggle-theme($claude-theme);
+@include mat.icon-theme($claude-theme);
+@include mat.tooltip-theme($claude-theme);
+@include mat.divider-theme($claude-theme);
 
 // Global styles
 html, body {
