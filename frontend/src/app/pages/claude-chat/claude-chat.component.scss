@@ -24,18 +24,58 @@
 
       .status-info {
         display: flex;
-        gap: 8px;
+        gap: 16px;
         align-items: center;
 
-        .status-chip, .mode-chip {
+        .status-chip {
           font-size: 13px;
           height: 28px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+          }
+
+          &.available {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+
+            .status-dot {
+              background-color: #4caf50;
+            }
+          }
+
+          &.unavailable {
+            background-color: #ffebee;
+            color: #c62828;
+
+            .status-dot {
+              background-color: #f44336;
+            }
+          }
+        }
+
+        .mode-toggle {
+          font-size: 14px;
         }
       }
     }
 
     .settings-button {
+      width: 40px;
+      height: 40px;
       color: #666;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
 
       &:hover {
         color: #1976d2;

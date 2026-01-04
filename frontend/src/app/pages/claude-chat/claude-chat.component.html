@@ -4,12 +4,19 @@
     <div class="status-left">
       <h1>Claude Code GUI</h1>
       <div class="status-info" *ngIf="statusChecked">
-        <mat-chip [color]="claudeAvailable ? 'primary' : 'warn'" class="status-chip">
-          {{ claudeAvailable ? '● Available' : '● Not Available' }}
+        <mat-chip class="status-chip" [class.available]="claudeAvailable" [class.unavailable]="!claudeAvailable">
+          <span class="status-dot"></span>
+          {{ claudeAvailable ? 'Available' : 'Not Available' }}
         </mat-chip>
-        <mat-chip class="mode-chip">
+        <mat-slide-toggle
+          [(ngModel)]="useMcpMode"
+          (ngModelChange)="onModeChange()"
+          [disabled]="isAnalyzing || !mcpModeAvailable"
+          color="primary"
+          class="mode-toggle"
+        >
           {{ useMcpMode ? '💬 MCP Mode' : '📄 Simple Mode' }}
-        </mat-chip>
+        </mat-slide-toggle>
       </div>
     </div>
     <button mat-icon-button (click)="goToSettings()" class="settings-button" matTooltip="Settings">
