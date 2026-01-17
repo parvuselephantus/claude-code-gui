@@ -5,7 +5,7 @@
 
   <groupId>com.claudegui</groupId>
   <artifactId>claude-code-gui-backend</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Claude Code GUI Backend</name>
@@ -83,6 +83,10 @@
             <goals>
               <goal>repackage</goal>
             </goals>
+            <configuration>
+              <!-- Create both executable JAR and plain JAR for library use -->
+              <classifier>exec</classifier>
+            </configuration>
           </execution>
         </executions>
       </plugin>
