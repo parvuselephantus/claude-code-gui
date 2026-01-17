@@ -1,0 +1,26 @@
+{
+  "name": "@funit/claude-code-gui-lib",
+  "version": "0.0.1",
+  "description": "Angular library for Claude Code GUI integration - provides components and services for AI-powered stock analysis",
+  "keywords": ["angular", "claude", "ai", "stock-analysis", "claude-code"],
+  "author": "F-Unit",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/parvuselephantus/claude-code-gui.git"
+  },
+  "homepage": "https://github.com/parvuselephantus/claude-code-gui#readme",
+  "scripts": {
+    "prepare": "cd frontend && npm install && npm run build:lib && cp -r dist/claude-code-gui-lib/* ../",
+    "postinstall": "npm run prepare"
+  },
+  "peerDependencies": {
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/material": "^19.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}
