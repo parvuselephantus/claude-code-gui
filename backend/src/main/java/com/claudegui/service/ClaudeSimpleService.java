@@ -44,7 +44,8 @@ public class ClaudeSimpleService {
         ProcessBuilder pb = new ProcessBuilder(
             "claude",
             "--print",
-            "--output-format", "json"
+            "--output-format", "json",
+            "--dangerously-skip-permissions"
         );
 
         pb.redirectErrorStream(false);

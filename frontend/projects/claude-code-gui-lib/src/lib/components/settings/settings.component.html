@@ -1,0 +1,190 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>⚙️ Settings</h1>
+  </div>
+
+  <!-- Analysis Mode Settings -->
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>Analysis Mode</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="setting-item">
+        <mat-slide-toggle
+          [(ngModel)]="useMcpMode"
+          [disabled]="!mcpModeAvailable"
+          color="primary"
+        >
+          <span class="setting-label">
+            {{ useMcpMode ? '💬 MCP Mode (Conversation)' : '📄 Simple Mode (One-shot)' }}
+          </span>
+        </mat-slide-toggle>
+        <p class="setting-description">
+          <span *ngIf="!useMcpMode">
+            Simple Mode: Claude provides a single analysis response. Best for quick questions.
+          </span>
+          <span *ngIf="useMcpMode">
+            MCP Mode: Claude maintains conversation history for multi-turn discussions. Best for complex exploratory questions.
+          </span>
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Coming Soon Section -->
+  <mat-card class="settings-card coming-soon">
+    <mat-card-header>
+      <mat-card-title>🔮 Coming Soon</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="coming-soon-intro">The following features are planned for future releases:</p>
+
+      <!-- Workspace Settings -->
+      <div class="feature-section">
+        <h3>📁 Workspace Settings</h3>
+        <div class="setting-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Default Project Root</mat-label>
+            <input matInput value="Current Directory" disabled>
+          </mat-form-field>
+        </div>
+        <div class="setting-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Default Analysis Mode</mat-label>
+            <mat-select disabled value="simple">
+              <mat-option value="simple">Simple Mode</mat-option>
+              <mat-option value="mcp">MCP Mode</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Prompts & Templates -->
+      <div class="feature-section">
+        <h3>📝 Prompts & Templates</h3>
+        <div class="setting-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>System Prompt</mat-label>
+            <textarea matInput rows="3" disabled placeholder="Customize Claude's behavior with a custom system prompt..."></textarea>
+          </mat-form-field>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Quick Prompts</label>
+          <p class="setting-description">Create reusable prompt templates for common tasks</p>
+          <button mat-stroked-button disabled>
+            <mat-icon>add</mat-icon>
+            Add Quick Prompt
+          </button>
+        </div>
+      </div>
+
+      <!-- Display & Behavior -->
+      <div class="feature-section">
+        <h3>🎨 Display & Behavior</h3>
+        <div class="setting-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Language</mat-label>
+            <mat-select disabled value="en">
+              <mat-option value="en">English</mat-option>
+              <mat-option value="pl">Polski</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="setting-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Theme</mat-label>
+            <mat-select disabled value="light">
+              <mat-option value="light">Light</mat-option>
+              <mat-option value="dark">Dark</mat-option>
+              <mat-option value="auto">Auto (System)</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="setting-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Font Size</mat-label>
+            <mat-select disabled value="medium">
+              <mat-option value="small">Small</mat-option>
+              <mat-option value="medium">Medium</mat-option>
+              <mat-option value="large">Large</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="setting-item">
+          <mat-slide-toggle disabled color="primary">
+            <span class="setting-label">Show Timestamps</span>
+          </mat-slide-toggle>
+        </div>
+        <div class="setting-item">
+          <mat-slide-toggle disabled color="primary">
+            <span class="setting-label">Auto-scroll to Latest Message</span>
+          </mat-slide-toggle>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="feature-section">
+        <h3>🔔 Notifications</h3>
+        <div class="setting-item">
+          <mat-slide-toggle disabled color="primary">
+            <span class="setting-label">Desktop Notifications</span>
+          </mat-slide-toggle>
+          <p class="setting-description">Get notified when Claude completes a response</p>
+        </div>
+        <div class="setting-item">
+          <mat-slide-toggle disabled color="primary">
+            <span class="setting-label">Sound Alerts</span>
+          </mat-slide-toggle>
+        </div>
+      </div>
+
+      <!-- Privacy & Storage -->
+      <div class="feature-section">
+        <h3>🔒 Privacy & Storage</h3>
+        <div class="setting-item">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Conversation History</mat-label>
+            <mat-select disabled value="session">
+              <mat-option value="none">Don't Save</mat-option>
+              <mat-option value="session">Session Only</mat-option>
+              <mat-option value="persistent">Save Locally</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">Data Export/Import</label>
+          <p class="setting-description">Export or import conversation history</p>
+          <div class="button-group">
+            <button mat-stroked-button disabled>
+              <mat-icon>download</mat-icon>
+              Export
+            </button>
+            <button mat-stroked-button disabled>
+              <mat-icon>upload</mat-icon>
+              Import
+            </button>
+          </div>
+        </div>
+        <div class="setting-item">
+          <button mat-stroked-button disabled color="warn">
+            <mat-icon>delete</mat-icon>
+            Clear All History
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Save Button -->
+  <div class="settings-actions">
+    <button mat-raised-button color="primary" (click)="saveSettings()">
+      Save & Return
+    </button>
+    <button mat-stroked-button (click)="goBack()">
+      Cancel
+    </button>
+  </div>
+</div>

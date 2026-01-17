@@ -50,7 +50,8 @@ public class ClaudeMcpService {
             ProcessBuilder pb = new ProcessBuilder(
                 "claude",
                 "--print",
-                "--output-format", "text"
+                "--output-format", "text",
+                "--dangerously-skip-permissions"
             );
 
             pb.redirectErrorStream(false);
