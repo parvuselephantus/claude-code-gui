@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Angular library for Claude Code GUI integration - provides components and services for AI-powered stock analysis",
   "keywords": ["angular", "claude", "ai", "stock-analysis", "claude-code"],
-  "author": "F-Unit",
+  "author": "Funit",
   "license": "MIT",
   "repository": {
     "type": "git",
