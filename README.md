@@ -1,8 +1,10 @@
 # Claude Code GUI
 
-A clean, standalone web GUI for interacting with Claude Code CLI. Simple chat interface with conversation support.
+Web GUI for Claude Code CLI with two usage modes:
+1. **Standalone**: Independent web app
+2. **Library**: Integrate into existing Java/Angular projects
 
-## Quick Start
+## Quick Start (Standalone)
 
 ### Linux/Mac
 ```bash
@@ -244,6 +246,62 @@ Set `autoOpenBrowser: false` in config and open manually:
 ```
 http://localhost:4200
 ```
+
+---
+
+---
+
+## Library Usage
+
+### Maven Dependency (Backend)
+
+Build and install locally:
+```bash
+cd backend
+mvn clean install
+```
+
+Add to your `pom.xml`:
+```xml
+<dependency>
+    <groupId>com.claudegui</groupId>
+    <artifactId>claude-code-gui</artifactId>
+    <version>1.0.0</version>
+    <scope>system</scope>
+    <systemPath>${project.basedir}/../../claude_code_gui/backend/target/claude-code-gui-1.0.0.jar</systemPath>
+</dependency>
+```
+
+Use services:
+```java
+@Autowired
+private ClaudeMcpService claudeMcpService;
+
+@Autowired
+private ClaudeSimpleService claudeSimpleService;
+```
+
+### NPM Package (Frontend)
+
+Build library:
+```bash
+cd frontend
+ng build claude-code-gui-lib --configuration production
+cd dist/claude-code-gui-lib
+npm pack
+```
+
+Install in your project:
+```bash
+npm install path/to/claude-code-gui-lib-0.0.1.tgz
+```
+
+Import components:
+```typescript
+import { ClaudeChatComponent, SettingsComponent, ClaudeService } from 'claude-code-gui-lib';
+```
+
+See example integration in [Stock project](https://github.com/parvuselephantus/stock).
 
 ---
 
