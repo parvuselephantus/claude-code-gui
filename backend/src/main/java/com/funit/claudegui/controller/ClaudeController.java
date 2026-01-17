@@ -1,11 +1,11 @@
-package com.claudegui.controller;
+package com.funit.claudegui.controller;
 
-import com.claudegui.model.dto.ClaudeAnalysisRequest;
-import com.claudegui.model.dto.ClaudeAnalysisResponse;
-import com.claudegui.model.dto.ClaudeStatusResponse;
-import com.claudegui.service.ClaudeSimpleService;
-import com.claudegui.service.ClaudeMcpService;
-import com.claudegui.service.WebSocketOutboundService;
+import com.funit.claudegui.model.dto.ClaudeAnalysisRequest;
+import com.funit.claudegui.model.dto.ClaudeAnalysisResponse;
+import com.funit.claudegui.model.dto.ClaudeStatusResponse;
+import com.funit.claudegui.service.ClaudeSimpleService;
+import com.funit.claudegui.service.ClaudeMcpService;
+import com.funit.claudegui.service.WebSocketOutboundService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

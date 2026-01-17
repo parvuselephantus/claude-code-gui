@@ -1,4 +1,4 @@
-package com.claudegui.service;
+package com.funit.claudegui.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

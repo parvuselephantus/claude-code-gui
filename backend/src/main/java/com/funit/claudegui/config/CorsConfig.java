@@ -1,4 +1,4 @@
-package com.claudegui.config;
+package com.funit.claudegui.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

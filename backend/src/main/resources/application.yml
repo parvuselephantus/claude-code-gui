@@ -7,5 +7,5 @@ spring:
 
 logging:
   level:
-    com.claudegui: INFO
+    com.funit.claudegui: INFO
     org.springframework: WARN

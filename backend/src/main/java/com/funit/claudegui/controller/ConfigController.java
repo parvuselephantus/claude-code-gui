@@ -1,6 +1,6 @@
-package com.claudegui.controller;
+package com.funit.claudegui.controller;
 
-import com.claudegui.config.GuiConfiguration;
+import com.funit.claudegui.config.GuiConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;

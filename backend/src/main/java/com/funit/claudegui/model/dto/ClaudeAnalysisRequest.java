@@ -1,4 +1,4 @@
-package com.claudegui.model.dto;
+package com.funit.claudegui.model.dto;
 
 public class ClaudeAnalysisRequest {
     private String prompt;
